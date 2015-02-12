@@ -52,7 +52,8 @@ angular.module('dt.javaBeanEditor', [])
     'int': 'int',
     'double': 'double',
     'long': 'int',
-    'java.lang.String': 'string'
+    'java.lang.String': 'string',
+    'java.util.List': 'array'
   };
 
   return {
@@ -61,27 +62,62 @@ angular.module('dt.javaBeanEditor', [])
     link: {
       pre: function(scope, elem, attrs) {
 
+        // cache property in local var
+        var property = scope.property;
+
+        // nice display name
+        scope.propertyDisplayName = _.startCase(property.name);
+
+        // check if we should hide the label
         scope.hideLabel = scope.$eval(attrs.hideLabel);
 
         // must differentiate between array and object
-        scope.valueType = scope.values[scope.property.name] instanceof Array ? 'array' : typeof scope.values[scope.property.name];
+        scope.valueType = scope.values[property.name] instanceof Array ? 'array' : typeof scope.values[property.name];
 
-        scope.getType = function(property) {
-          var known = knownTypes[property.type];
-          if (known) {
-            return known;
-          }
-          // Check for array
-          if (property.type.indexOf('[L') === 0 && property.type.slice(-1) === ';') {
-            return 'array';
-          }
-          // Otherwise it is complex
-          return 'complex';
+        // set correct input type for template retrieval
+        var known = knownTypes[property.type];
+        if (known) {
+          scope.inputType = known;
         }
-        scope.propertyDisplayName = _.startCase(scope.property.name);
+        // Check for array
+        else if (property.type.indexOf('[L') === 0 && property.type.slice(-1) === ';') {
+          scope.inputType = 'array';
+        }
+        // Otherwise it is complex
+        else {
+          scope.inputType = 'complex';  
+        }
+
+        // SPECIAL CASE: arrays
+        if (scope.inputType === 'array') {
+          
+          // scope.typeArg:
+
+          // Lists
+          if (property.hasOwnProperty('typeArgs')) {
+            scope.typeArg = property.typeArgs[0].type;
+          }
+          // Arrays
+          else {
+            scope.typeArg = property.type.slice(2,-1);
+          }
+
+          // scope.values:
+          
+          // Arrays<Simple>
+          if (scope.valueType === 'array') {
+            scope.values = scope.values[property.name];
+          }
+          // Lists & Arrays<Complex>
+          else {
+            var key = Object.keys(scope.values[property.name])[0];
+            scope.values = scope.values[property.name][key];
+          }
+          
+        }
       }
     }
-  }
+  };
 
 })
 .directive('jbeComplexProperty', function() {
@@ -101,6 +137,9 @@ angular.module('dt.javaBeanEditor', [])
           else if (value instanceof Array){
             return value;
           }
+          else if (value === null) {
+            return 'null';
+          }
           else {
             return '(complex object)';
           }
@@ -113,13 +152,12 @@ angular.module('dt.javaBeanEditor', [])
               valueType,
               fetchAssignableTypes = true;
   
-  
           // Check for simple array
           if (value instanceof Array) {
             valueType = propertyType;
   
             // If it is an array, we do not need to get assignableTypes OR the type schema
-            fetchAssignableTypes = true
+            fetchAssignableTypes = true;
           }
   
           // getAssignableTypes
@@ -129,15 +167,17 @@ angular.module('dt.javaBeanEditor', [])
         };
       }
     }
-  }
+  };
 
 })
 .directive('jbeArrayProperty', function() {
   return {
     scope: {
       arrayProperty: '=jbeArrayProperty',
+      typeArg: '=',
       values: '=',
-      index: '='
+      index: '=',
+      helperService: '='
     },
     templateUrl: 'components/javaBeanEditor/jbeArrayProperty.html',
     link: {
@@ -151,13 +191,9 @@ angular.module('dt.javaBeanEditor', [])
           canGet: true,
           canSet: true,
           name: scope.index,
-          type: arrProp.type.slice(2,-1)
+          type: scope.typeArg
         };
-
-        scope.values = scope.values[arrProp.name];
-        console.log('scope.index: ', scope.index);
-        console.log('scope.values: ', scope.values);
       }
     }
-  }
+  };
 });
