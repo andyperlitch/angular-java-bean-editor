@@ -7,12 +7,19 @@
 </div>
 <div ng-show="retrievingEditInfo" class="text-muted">loading edit info…</div>
 <div ng-if="editing && !retrievingEditInfo">
-  <hr>
-  <div 
-    ng-if="valueTypeSchema"
-    java-bean-editor
-    helper-service="helperService"
-    type-schema="valueTypeSchema"
-    values="values[property.name]">
+  
+  <div class="panel panel-default">
+  <!-- Default panel contents -->
+    <div class="panel-heading">{{propertyDisplayName}}</div>
+    <div class="panel-body">
+      <div 
+        ng-if="valueTypeSchema"
+        java-bean-editor
+        helper-service="helperService"
+        type-schema="valueTypeSchema"
+        values="values[property.name]">
+      </div>    
+    </div>
   </div>
 </div>
+

@@ -2,18 +2,19 @@
 
 <div class="well well-sm">
 
-  <!-- simple-type arrays -->  
-    <div
-      ng-repeat="value in values track by $index"
-      jbe-array-property="property"
-      type-arg="typeArg"
-      values="values"
-      helper-service="helperService"
-      index="$index">
-    </div>  
-    <button class="btn btn-success" ng-click="values.push(null)">
-      <span class="glyphicon glyphicon-plus"></span>
-      add one
-    </button>
+  <p ng-if="!values" class="text-muted"><em>(null)</em></p>
+  <div
+    ng-if="values"
+    ng-repeat="value in values track by $index"
+    jbe-array-property="property"
+    type-arg="typeArg"
+    values="values"
+    helper-service="helperService"
+    index="$index">
+  </div>  
+  <button class="btn btn-success" ng-click="addNew()">
+    <span class="glyphicon glyphicon-plus"></span>
+    add one
+  </button>
     
 </div>

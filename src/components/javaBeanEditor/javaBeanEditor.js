@@ -30,6 +30,13 @@ angular.module('dt.javaBeanEditor', [])
 **/
 .directive('javaBeanEditor', function() {
 
+  var link = {
+    pre: function(scope) {
+      console.log('linking javaBeanEditor');
+      scope.values = scope.values[scope.typeSchema.name];
+    }
+  };
+
   return {
     scope: {
       typeSchema: '=',
@@ -37,12 +44,7 @@ angular.module('dt.javaBeanEditor', [])
       helperService: '='
     },
     templateUrl: 'components/javaBeanEditor/javaBeanEditor.html',
-    link: {
-      pre: function(scope) {
-        console.log('testing');
-        scope.values = scope.values[scope.typeSchema.name];
-      }
-    }
+    link: link
   };
 
 })
@@ -54,7 +56,8 @@ angular.module('dt.javaBeanEditor', [])
     'double': 'double',
     'long': 'int',
     'java.lang.String': 'string',
-    'java.util.List': 'array'
+    'java.util.List': 'array',
+    'java.util.ArrayList': 'array'
   };
 
   return {
@@ -91,7 +94,7 @@ angular.module('dt.javaBeanEditor', [])
 
         // SPECIAL CASE: arrays
         if (scope.inputType === 'array') {
-          
+
           // scope.typeArg:
 
           // Lists
@@ -110,10 +113,19 @@ angular.module('dt.javaBeanEditor', [])
             scope.values = scope.values[property.name];
           }
           // Lists & Arrays<Complex>
-          else {
+          else if (angular.isObject(scope.values[property.name])) {
             var key = Object.keys(scope.values[property.name])[0];
             scope.values = scope.values[property.name][key];
           }
+          // null case
+          else if (scope.values[property.name] === null) {
+            scope.values = null;
+          }
+
+          // add new item function
+          scope.addNew = function() {
+            scope.values.push(null);
+          };
           
         }
       }
@@ -172,7 +184,7 @@ angular.module('dt.javaBeanEditor', [])
 
           // format for all other complex object values
           else {
-            valueType = value[Object.keys(value)[0]];
+            valueType = Object.keys(value)[0];
           }
 
           // debugging

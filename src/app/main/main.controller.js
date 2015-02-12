@@ -181,6 +181,7 @@ angular.module('angularJavaBeanEditor')
         return dfd.promise;
       },
       getTypeSchema: function(className) {
+        console.log('className', className);
         var dfd = $q.defer();
 
         $timeout(function() {
