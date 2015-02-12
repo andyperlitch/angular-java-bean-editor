@@ -39,6 +39,7 @@ angular.module('dt.javaBeanEditor', [])
     templateUrl: 'components/javaBeanEditor/javaBeanEditor.html',
     link: {
       pre: function(scope) {
+        console.log('testing');
         scope.values = scope.values[scope.typeSchema.name];
       }
     }
@@ -120,7 +121,7 @@ angular.module('dt.javaBeanEditor', [])
   };
 
 })
-.directive('jbeComplexProperty', function() {
+.directive('jbeComplexProperty', function($q) {
 
   var displayableTypes = ['number', 'string', 'boolean'];
 
@@ -145,25 +146,66 @@ angular.module('dt.javaBeanEditor', [])
           }
         };
         scope.edit = function() {
+
+          // Set edit mode
+          scope.editing = true;
   
+          // cache some variables
           var property = scope.property,
               propertyType = property.type,
               value = scope.values[property.name],
               valueType,
-              fetchAssignableTypes = true;
-  
-          // Check for simple array
-          if (value instanceof Array) {
-            valueType = propertyType;
-  
-            // If it is an array, we do not need to get assignableTypes OR the type schema
-            fetchAssignableTypes = true;
+              shouldFetchValueTypeSchema = true,
+              shouldFetchAssignableTypes = true;
+
+
+          // when the current value is null
+          if (value === null) {
+            shouldFetchValueTypeSchema = false;
           }
-  
-          // getAssignableTypes
-          var assignableTypes = scope.helperService.getAssignableTypes(propertyType);
-          // getTypeSchema
-          scope.helperService.getTypeSchema(valueType)
+
+          // probably an enum?
+          else if (!angular.isObject(value)) {
+            valueType = propertyType;
+            shouldFetchAssignableTypes = false;
+          }
+
+          // format for all other complex object values
+          else {
+            valueType = value[Object.keys(value)[0]];
+          }
+
+          // debugging
+          console.log('property', property);
+          console.log('value', value);
+          console.log('values', scope.values);
+          console.log('valueType', valueType);
+          console.log('shouldFetchAssignableTypes? ', shouldFetchAssignableTypes);
+          console.log('shouldFetchValueTypeSchema? ', shouldFetchValueTypeSchema);
+
+          // promises
+          var assignableTypesPromise = shouldFetchAssignableTypes ? scope.helperService.getAssignableTypes(propertyType) : $q.when(undefined);
+          var valueTypeSchemaPromise = shouldFetchValueTypeSchema ? scope.helperService.getTypeSchema(valueType) : $q.when(undefined);
+          
+          scope.retrievingEditInfo = true;
+          scope.assignableTypes = undefined;
+          scope.valueTypeSchema = undefined;
+          var retrievalPromise = $q.all([assignableTypesPromise, valueTypeSchemaPromise]);
+          retrievalPromise.then(
+            // success
+            function(results) {
+              scope.assignableTypes = results[0];
+              scope.valueTypeSchema = results[1];
+            },
+            // error
+            function() {
+              console.log('error...', arguments);
+            }
+          );
+          retrievalPromise.finally(function() {
+            scope.retrievingEditInfo = false;
+          });
+
         };
       }
     }

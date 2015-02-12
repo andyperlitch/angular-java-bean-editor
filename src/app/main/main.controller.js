@@ -174,8 +174,10 @@ angular.module('angularJavaBeanEditor')
       getAssignableTypes: function(propertyType) {
         var dfd = $q.defer();
 
-        
-        
+        $timeout(function() {
+          dfd.resolve([]);
+        });
+
         return dfd.promise;
       },
       getTypeSchema: function(className) {
