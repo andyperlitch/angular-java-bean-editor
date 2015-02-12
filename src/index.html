@@ -29,7 +29,10 @@
     
       <div ng-include="'components/navbar/navbar.html'"></div>
     
+      <p class="text-muted" ng-hide="exampleTypeSchema">Loading Example Type Schema...</p>
+
       <div 
+        ng-if="exampleTypeSchema"
         java-bean-editor
         helper-service="typeSchemaHelper"
         type-schema="exampleTypeSchema"

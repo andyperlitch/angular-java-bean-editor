@@ -1,0 +1,23 @@
+<label>{{propertyDisplayName}}</label>
+<!-- simple-type arrays -->
+<div class="well">
+  <div
+    ng-if="valueType === 'array'"
+    ng-repeat="value in values[property.name]"
+    jbe-array-property="property"
+    values="values"
+    index="$index">
+  </div>
+  <!-- complex-type arrays -->
+  <div
+    ng-if="valueType === 'object'"
+    ng-repeat="value in values[property.name][property.type]"
+    jbe-array-property="property"
+    values="values"
+    index="$index">
+  </div>
+  <button class="btn btn-success" ng-click="addOne()">
+    <span class="glyphicon glyphicon-plus"></span>
+    add one
+  </button>
+</div>

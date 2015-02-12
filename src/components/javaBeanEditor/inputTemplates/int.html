@@ -1,5 +1,5 @@
 <div class="form-group">
-  <label ng-attr-for="{{property.name}}">
+  <label ng-attr-for="{{property.name}}" ng-hide="hideLabel">
     <span ng-bind="propertyDisplayName" ng-attr-title="{{property.name}}"></span>
   </label>
   <input type="number" class="form-control" ng-attr-name="{{property.name}}" ng-attr-placeholder="{{property.type}}" ng-model="values[property.name]" step="1">

@@ -4,7 +4,9 @@ angular.module('angularJavaBeanEditor')
   .controller('MainCtrl', function ($scope, typeSchemaHelper) {
     
     $scope.typeSchemaHelper = typeSchemaHelper;
-    $scope.exampleTypeSchema = typeSchemaHelper.getTypeSchema('com.datatorrent.stram.webapp.OperatorDiscoveryTest$TestOperator');
+    typeSchemaHelper.getTypeSchema('com.datatorrent.stram.webapp.OperatorDiscoveryTest$TestOperator').then(function(schema){
+      $scope.exampleTypeSchema = schema;
+    });
     $scope.exampleValueSchema = {"com.datatorrent.stram.webapp.OperatorDiscoveryTest$TestOperator": {
       "name": null,
       "intProp": 0,
@@ -37,7 +39,7 @@ angular.module('angularJavaBeanEditor')
 
 
   })
-  .factory('typeSchemaHelper', function() {
+  .factory('typeSchemaHelper', function($q, $timeout) {
 
     var schemas = {
 
@@ -170,10 +172,18 @@ angular.module('angularJavaBeanEditor')
 
     return {
       getAssignableTypes: function(propertyType) {
+        var dfd = $q.defer();
 
+        return dfd.promise;
       },
       getTypeSchema: function(className) {
-        return schemas[className];
+        var dfd = $q.defer();
+
+        $timeout(function() {
+          dfd.resolve(schemas[className]);
+        }, 1000);
+
+        return dfd.promise;
       }
     }
   });
