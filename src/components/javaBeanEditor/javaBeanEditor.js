@@ -21,7 +21,7 @@ angular.module('dt.javaBeanEditor', [])
   * @ngdoc directive
   * @name javaBeanEditor
   * @restrict A
-  * @description A directive for 
+  * @description A directive for editing a java bean.
   * @element 
   * @example 
   <pre>
@@ -36,7 +36,12 @@ angular.module('dt.javaBeanEditor', [])
       values: '=',
       helperService: '='
     },
-    templateUrl: 'components/javaBeanEditor/javaBeanEditor.html'
+    templateUrl: 'components/javaBeanEditor/javaBeanEditor.html',
+    link: {
+      pre: function(scope) {
+        scope.values = scope.values[scope.typeSchema.name];
+      }
+    }
   };
 
 })
@@ -51,10 +56,7 @@ angular.module('dt.javaBeanEditor', [])
   };
 
   return {
-    scope: {
-      property: '=jbeProperty',
-      values: '='
-    },
+    scope: true,
     templateUrl: 'components/javaBeanEditor/jbeProperty.html',
     link: {
       pre: function(scope) {
@@ -72,10 +74,7 @@ angular.module('dt.javaBeanEditor', [])
   var displayableTypes = ['number', 'string', 'boolean'];
 
   return {
-    scope: {
-      property: '=jbeComplexProperty',
-      values: '='
-    },
+    scope: false,
     templateUrl: 'components/javaBeanEditor/jbeComplexProperty.html',
     link: function(scope) {
       scope.propertyDisplayName = _.startCase(scope.property.name);
